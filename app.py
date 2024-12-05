@@ -1,9 +1,9 @@
 from dotenv import load_dotenv
 from flask import Flask, jsonify, make_response, Response, request
 
-from music_collection.models import song_model
-from music_collection.models.playlist_model import PlaylistModel
-from music_collection.utils.sql_utils import check_database_connection, check_table_exists
+from weather_management.models import song_model
+from weather_management.models.playlist_model import PlaylistModel
+from weather_management.utils.sql_utils import check_database_connection, check_table_exists
 
 
 # Load environment variables from .env file
@@ -46,9 +46,9 @@ def db_check() -> Response:
         app.logger.info("Checking database connection...")
         check_database_connection()
         app.logger.info("Database connection is OK.")
-        app.logger.info("Checking if songs table exists...")
-        check_table_exists("songs")
-        app.logger.info("songs table exists.")
+        app.logger.info("Checking if Users table exists...")
+        check_table_exists("Users")
+        app.logger.info("Users table exists.")
         return make_response(jsonify({'database_status': 'healthy'}), 200)
     except Exception as e:
         return make_response(jsonify({'error': str(e)}), 404)

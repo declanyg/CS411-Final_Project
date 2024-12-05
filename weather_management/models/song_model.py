@@ -3,9 +3,9 @@ import logging
 import os
 import sqlite3
 
-from music_collection.utils.logger import configure_logger
-from music_collection.utils.random_utils import get_random
-from music_collection.utils.sql_utils import get_db_connection
+from weather_management.utils.logger import configure_logger
+from weather_management.utils.random_utils import get_random
+from weather_management.utils.sql_utils import get_db_connection
 
 
 logger = logging.getLogger(__name__)
@@ -15,29 +15,18 @@ configure_logger(logger)
 @dataclass
 class Song:
     id: int
-    artist: str
-    title: str
-    year: int
-    genre: str
-    duration: int  # in seconds
+    username: str
+    salt: str
+    hashed_password: str
 
-    def __post_init__(self):
-        if self.duration <= 0:
-            raise ValueError(f"Duration must be greater than 0, got {self.duration}")
-        if self.year <= 1900:
-            raise ValueError(f"Year must be greater than 1900, got {self.year}")
-
-
-def create_song(artist: str, title: str, year: int, genre: str, duration: int) -> None:
+def create_user(username: str, salt: str, hashed_password: int) -> None:
     """
-    Creates a new song in the songs table.
+    Creates a new user in the users table.
 
     Args:
-        artist (str): The artist's name.
-        title (str): The song title.
-        year (int): The year the song was released.
-        genre (str): The song genre.
-        duration (int): The duration of the song in seconds.
+        username (str): The user's username.
+        salt (str): The uniquely generated salt for the user.
+        hashed_password (str): The hashed_password for the user.
 
     Raises:
         ValueError: If year or duration are invalid.
@@ -45,17 +34,12 @@ def create_song(artist: str, title: str, year: int, genre: str, duration: int) -
         sqlite3.Error: For any other database errors.
     """
     # Validate the required fields
-    if not isinstance(year, int) or year < 1900:
-        raise ValueError(f"Invalid year provided: {year} (must be an integer greater than or equal to 1900).")
-    if not isinstance(duration, int) or duration <= 0:
-        raise ValueError(f"Invalid song duration: {duration} (must be a positive integer).")
-
     try:
         # Use the context manager to handle the database connection
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
-                INSERT INTO songs (artist, title, year, genre, duration)
+                INSERT INTO Users (artist, title, year, genre, duration)
                 VALUES (?, ?, ?, ?, ?)
             """, (artist, title, year, genre, duration))
             conn.commit()
