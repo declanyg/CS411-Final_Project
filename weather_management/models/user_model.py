@@ -17,7 +17,7 @@ class User:
     salt: str
     hashed_password: str
 
-def login(username: str, password: int) -> None:
+def login(username: str, password: int) -> bool:
     """
     Log into a user stored in the users table.
 
@@ -26,6 +26,7 @@ def login(username: str, password: int) -> None:
         hashed_password (str): The hashed_password for the user.
 
     Raises:
+        ValueError: If username is invalid.
         ValueError: If username is invalid.
         sqlite3.Error: For any other database errors.
     """
@@ -41,8 +42,10 @@ def login(username: str, password: int) -> None:
                 # Check the password
                 if hashed_password == bcrypt.hashpw(password.encode('utf-8'), salt):
                     logger.info("Logged into user with username %d", username)
+                    return True
                 else:
                     logger.info("Incorrect password for user with username %d", username)
+                    return False
             else:
                 logger.info("User with username %d not found", username)
                 raise ValueError(f"User with username {username} not found")
