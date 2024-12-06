@@ -25,3 +25,4 @@ def test_set_favourite_location_success():
     favourites_model.set_favourite_location("Boston")
     assert len(favourites_model.favourites) == 1
     assert favourites_model.favourites[0] == 'Boston'
+
