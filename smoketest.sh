@@ -49,13 +49,89 @@ check_db() {
 
 ##########################################################
 #
-# User
+# Password Storage
 #
 ##########################################################
+
+clear_users() {
+  echo "Clearing users..."
+  curl -s -X DELETE "$BASE_URL/clear-users" | grep -q '"status": "success"'
+}
+
+login() {
+  username=$1
+  password=$2
+
+  echo "Logging into user $username with password $password..."
+  response=$(curl -s -X POST "$BASE_URL/login" -H "Content-Type: application/json" \
+    -d "{\"username\":\"$username\", \"password\":\"$password\"}")
+
+  echo $response | grep -q '"status": "success"'
+
+  if [ $? -eq 0 ]; then
+    echo "User login successful."
+  else
+    echo "Failed to login user."
+    echo "Response: $response"
+    exit 1
+  fi
+}
+
+create_account() {
+  username=$1
+  password=$2
+
+  echo "Creating user ($username: $password)..."
+  response=$(curl -s -X POST "$BASE_URL/create-account" -H "Content-Type: application/json" \
+    -d "{\"username\":\"$username\", \"password\":\"$password\"}")
+
+  echo $response | grep -q '"status": "success"'
+
+  if [ $? -eq 0 ]; then
+    echo "User created successfully."
+  else
+    echo "Failed to create user."
+    echo "Response: $response"
+    exit 1
+  fi
+}
+
+update_password() {
+  username=$1
+  password=$2
+
+  echo "Updating user password ($username: $password)..."
+  response=$(curl -s -X POST "$BASE_URL/update-password" -H "Content-Type: application/json" \
+    -d "{\"username\":\"$username\", \"password\":\"$password\"}")
+
+  echo $response | grep -q '"status": "success"'
+
+  if [ $? -eq 0 ]; then
+    echo "User password updated successfully."
+  else
+    echo "Failed to update user password."
+    echo "Response: $response"
+    exit 1
+  fi
+}
 
 
 # Health checks
 check_health
 check_db
+
+# Clear users
+clear_users
+
+#User tests
+create_account "Bob" "1234"
+login "Bob" "1234"
+
+create_account "Jeffery" "1005mflmae"
+login "Jeffery" "1005mflmae"
+update_password "Jeffery" "Golbus411"
+login "Jeffery" "Golbus411"
+
+#Favourites Model tests
 
 echo "All tests passed successfully!"

@@ -117,7 +117,7 @@ def create_account() -> Response:
         400 error if input validation fails.
         500 error if there is an issue creating the user.
     """
-    app.logger.info('Logging into a user')
+    app.logger.info('Creating user')
     try:
         data = request.get_json()
 
@@ -170,7 +170,22 @@ def update_password() -> Response:
     except Exception as e:
         app.logger.error("Failed to update password: %s", str(e))
         return make_response(jsonify({'error': str(e)}), 500)
-    
+
+@app.route('/api/clear-users', methods=['DELETE'])
+def clear_users() -> Response:
+    """
+    Route to clear the all users (recreates the table).
+
+    Returns:
+        JSON response indicating the success of the operation or error message
+    """
+    try:
+        app.logger.info("Clearing users")
+        user_model.clear_users()
+        return make_response(jsonify({'status': 'success'}), 200)
+    except Exception as e:
+        app.logger.error(f"Error clearing users: {e}")
+        return make_response(jsonify({'error': str(e)}), 500)
 
 ##########################################################
 #

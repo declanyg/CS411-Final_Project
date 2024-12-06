@@ -9,7 +9,8 @@ from weather_management.models.user_model import (
     User,
     login,
     create_user,
-    update_password
+    update_password,
+    clear_users
 )
 
 ######################################################
@@ -60,7 +61,7 @@ def test_login_success(mock_cursor, mocker):
     result = login(username=username, password=password)
     assert result is True
 
-    mock_cursor.execute.assert_called_once_with("SELECT (salt, hashed_password) FROM Users WHERE username = ?", (username,))
+    mock_cursor.execute.assert_called_once_with("SELECT salt, hashed_password FROM Users WHERE username = ?", (username,))
 
 def test_login_failure(mock_cursor, mocker):
     """Test unsuccessful login."""
@@ -77,7 +78,7 @@ def test_login_failure(mock_cursor, mocker):
     result = login(username=username, password='4321')
     assert result is False
 
-    mock_cursor.execute.assert_called_once_with("SELECT (salt, hashed_password) FROM Users WHERE username = ?", (username,))
+    mock_cursor.execute.assert_called_once_with("SELECT salt, hashed_password FROM Users WHERE username = ?", (username,))
 
 def test_login_user_not_found(mock_cursor):
     mock_cursor.fetchone.return_value = None
@@ -148,7 +149,7 @@ def test_update_password_success(mock_cursor):
 
     # Normalize the expected SQL query
     expected_query = normalize_whitespace("""
-        UPDATE Users SET hashed_password = ? WHERE user = ?
+        UPDATE Users SET hashed_password = ? WHERE username = ?
     """)
 
     # Ensure the SQL query was executed correctly
@@ -178,3 +179,25 @@ def test_update_password_user_not_found(mock_cursor):
     # Import and call the update_password function
     with pytest.raises(ValueError, match=f"User with username {username} not found"):
         update_password(username=username, password=new_password)
+
+######################################################
+#
+#    Clear
+#
+######################################################
+
+def test_clear_users(mock_cursor, mocker):
+    """Test clearing all users (removes all users)."""
+
+    # Mock the file reading
+    mocker.patch.dict('os.environ', {'SQL_CREATE_TABLE_PATH': 'sql/create_tables.sql'})
+    mock_open = mocker.patch('builtins.open', mocker.mock_open(read_data="The body of the create statement"))
+
+    # Call the clear_database function
+    clear_users()
+
+    # Ensure the file was opened using the environment variable's path
+    mock_open.assert_called_once_with('sql/create_tables.sql', 'r')
+
+    # Verify that the correct SQL script was executed
+    mock_cursor.executescript.assert_called_once()

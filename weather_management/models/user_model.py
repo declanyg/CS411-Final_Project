@@ -35,8 +35,9 @@ def login(username: str, password: str) -> bool:
             cursor = conn.cursor()
             logger.info("Attempting to login user with username %s", username)
 
-            cursor.execute("SELECT (salt, hashed_password) FROM Users WHERE username = ?", (username,))
+            cursor.execute("SELECT salt, hashed_password FROM Users WHERE username = ?", (username,))
             row = cursor.fetchone()
+            
             if row:
                 salt, hashed_password = row[0], row[1]
                 # Check the password
@@ -114,7 +115,7 @@ def update_password(username: str, password: str) -> None:
                 # Update the password
                 salt = row[0]
                 hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
-                cursor.execute("UPDATE Users SET hashed_password = ? WHERE user = ?", (hashed_password, username,))
+                cursor.execute("UPDATE Users SET hashed_password = ? WHERE username = ?", (hashed_password, username,))
                 conn.commit()
 
                 logger.info("Password changed for user with username: %s", username)
@@ -125,4 +126,25 @@ def update_password(username: str, password: str) -> None:
 
     except sqlite3.Error as e:
         logger.error("Database error while updating password for user with username %s: %s", username, str(e))
+        raise e
+
+def clear_users() -> None:
+    """
+    Recreates the Users table, effectively deleting all users.
+
+    Raises:
+        sqlite3.Error: If any database error occurs.
+    """
+    try:
+        with open(os.getenv("SQL_CREATE_TABLE_PATH", "/app/sql/create_tables.sql"), "r") as fh:
+            create_table_script = fh.read()
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.executescript(create_table_script)
+            conn.commit()
+
+            logger.info("Users cleared successfully.")
+
+    except sqlite3.Error as e:
+        logger.error("Database error while clearing catalog: %s", str(e))
         raise e
