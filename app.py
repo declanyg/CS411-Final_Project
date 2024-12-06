@@ -103,7 +103,7 @@ def login() -> Response:
         return make_response(jsonify({'error': str(e)}), 500)
     
 @app.route('/api/create-account', methods=['POST'])
-def login() -> Response:
+def create_account() -> Response:
     """
     Route to create a new user
 
@@ -138,7 +138,7 @@ def login() -> Response:
         return make_response(jsonify({'error': str(e)}), 500)
     
 @app.route('/api/update-password', methods=['POST'])
-def login() -> Response:
+def update_password() -> Response:
     """
     Route to create a new user
 
@@ -291,7 +291,7 @@ def clear_favourites() -> Response:
 #
 ##########################################################
 
-@app.route('/api/get-all-favourites/<str:username>', methods=['GET'])
+@app.route('/api/get-all-favourites/<string:username>', methods=['GET'])
 def get_all_favourite_locations(username: str) -> Response:
     """
     Route to retrieve all favourited locations.
@@ -319,7 +319,7 @@ def get_all_favourite_locations(username: str) -> Response:
         app.logger.error(f"Error retrieving locations from favourites: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
 
-@app.route('/api/get_weather_by_favourite_location/<str:username>/<int:location>', methods=['GET'])
+@app.route('/api/get_weather_by_favourite_location/<string:username>/<int:location>', methods=['GET'])
 def get_weather_by_favourite_location(username: str, location: str) -> Response:
     """
     Route to retrieve a user's favourite location's weather.
@@ -350,7 +350,7 @@ def get_weather_by_favourite_location(username: str, location: str) -> Response:
         app.logger.error(f"Error retrieving weather from favourites: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
 
-@app.route('/api/get_all_favourite_weathers/<str:username>', methods=['GET'])
+@app.route('/api/get_all_favourite_weathers/<string:username>', methods=['GET'])
 def get_all_favourite_weathers(username: str) -> Response:
     """
     Route to retrieve the weather for all of a user's favourite locations.
@@ -380,7 +380,7 @@ def get_all_favourite_weathers(username: str) -> Response:
         app.logger.error(f"Error retrieving weathers from favourites: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
 
-@app.route('/api/get_historical_weather_by_favourite_location/<str:username>/<str:favourite_location>/<str:date>', methods=['GET'])
+@app.route('/api/get_historical_weather_by_favourite_location/<string:username>/<string:favourite_location>/<string:date>', methods=['GET'])
 def get_historical_weather_by_favourite_location(username: str, favourite_location: str, date: str) -> Response:
     """
     Route to retrieve the weather for all of a user's favourite locations.
@@ -412,7 +412,7 @@ def get_historical_weather_by_favourite_location(username: str, favourite_locati
         app.logger.error(f"Error retrieving historical weather data from favourited location: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
     
-@app.route('/api/get_forecast_by_favourite_location/<str:username>/<str:favourite_location>/<int:days>', methods=['GET'])
+@app.route('/api/get_forecast_by_favourite_location/<string:username>/<string:favourite_location>/<int:days>', methods=['GET'])
 def get_forecast_by_favourite_location(username: str, favourite_location: str, days: int) -> Response:
     """
     Route to retrieve the forecast for the next upcoming days for a favourite location.
@@ -444,7 +444,7 @@ def get_forecast_by_favourite_location(username: str, favourite_location: str, d
         app.logger.error(f"Error retrieving forecasted weather data from favourited location: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
 
-@app.route('/api/get_favourites_length/<str:username>', methods=['GET'])
+@app.route('/api/get_favourites_length/<string:username>', methods=['GET'])
 def get_favourites_length(username: str) -> Response:
     """
     Route to retrieve a the number of favourite locations a user has.
@@ -472,4 +472,4 @@ def get_favourites_length(username: str) -> Response:
         return make_response(jsonify({'error': str(e)}), 500)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5001)
