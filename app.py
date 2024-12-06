@@ -16,7 +16,6 @@ load_dotenv()
 app = Flask(__name__)
 
 favourites_models: Dict[str, FavouritesModel] = {}
-#os.getenv("API_KEY")
 
 ####################################################
 #

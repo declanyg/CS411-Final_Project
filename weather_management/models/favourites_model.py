@@ -2,11 +2,10 @@ import logging
 import requests
 from datetime import datetime
 from typing import List
-from Final_Project.weather_management.models.user_model import User
-from Final_Project.weather_management.models.WeatherData_model import WeatherData
-from Final_Project.weather_management.models.CurrentWeather_model import CurrentWeather
+from weather_management.models.user_model import User
+from weather_management.models.WeatherData_model import WeatherData
+from weather_management.models.CurrentWeather_model import CurrentWeather
 from weather_management.utils.logger import configure_logger
-# from weather_management.utils.sql_utils import get_db_connection
 
 logger = logging.getLogger(__name__)
 configure_logger(logger)
@@ -53,7 +52,7 @@ class FavouritesModel:
         success = self.validate_location_name(location)
         if success:
             self.favourites.append(location)
-            logger.info("Location %d has been added", location)
+            logger.info("Location %s has been added", location)
 
     def remove_favourite_location(self, location: str) -> None:
         """
