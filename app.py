@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify, make_response, Response, request
 
 from weather_management.models import user_model
-from weather_management.models.playlist_model import PlaylistModel
+from Final_Project.weather_management.models.favourites_model import PlaylistModel
 from weather_management.utils.sql_utils import check_database_connection, check_table_exists
 
 

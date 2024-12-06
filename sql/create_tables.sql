@@ -2,10 +2,9 @@
 DROP TABLE IF EXISTS Users;
 CREATE TABLE Users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT NOT NULL,
+    username TEXT NOT NULL UNIQUE,
     salt TEXT NOT NULL,
-    hashed_password TEXT NOT NULL,
-    UNIQUE(username, hashed_password)
+    hashed_password TEXT NOT NULL
 );
 
 -- -- Locations table

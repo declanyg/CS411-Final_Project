@@ -8,7 +8,7 @@ configure_logger(logger)
 
 #Data is in metric units
 @dataclass
-class Weather:
+class CurrentWeather:
     name: str
     temperature: float
     feels_like: float

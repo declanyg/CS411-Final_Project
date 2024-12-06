@@ -4,7 +4,7 @@ import sqlite3
 
 import pytest
 
-from weather_management.models.song_model import (
+from weather_management.models.favourites_model import (
     Song,
     create_song,
     clear_catalog,
