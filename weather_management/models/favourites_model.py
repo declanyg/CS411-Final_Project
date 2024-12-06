@@ -17,19 +17,20 @@ class FavouritesModel:
     A class to manage the favourite weather locations for a user.
 
     Attributes:
-        user (User): The current user.
+        username (str): The current user's username.
         favourites (List[str]): The list of locations.
         base_url (str): The base url used for requests to the API
+        api_key (str): The api key for WeatherAPI.com
     """
 
     def __init__(self, username, api_key):
         """
         Initializes the FavouritesModel with the user set to a User object with the username set to the given username, and an empty favourite location list.
         """
-        self.user: User = User(username=username)
+        self.username: str = username
         self.favourites: List[str] = []
-        self.base_url = "http://api.weatherapi.com/v1"
-        self.api_key = api_key
+        self.base_url: str = "http://api.weatherapi.com/v1"
+        self.api_key: str = api_key
 
     ##################################################
     # Favourite Location Management Functions
@@ -244,7 +245,7 @@ class FavouritesModel:
             logger.error("Location with name %s doesn't exist in favourites", favourite_location)
             raise ValueError(f"Location '{favourite_location}' not found in favourites.")
 
-    def get_forecast_by_favourite_location(self, favourite_location: str, days: int) -> List[Forecast]:
+    def get_forecast_by_favourite_location(self, favourite_location: str, days: int) -> List[WeatherData]:
         """
         Retrieves the forecast for the next upcoming days for a favourite location.
 
@@ -276,7 +277,7 @@ class FavouritesModel:
                 response = requests.get(self.base_url+'/forecast.json', params=params)
                 if response.status_code == 200:
                     for day in response["forecast"]["forecastday"]:
-                        forecasts.append(Forecast(
+                        forecasts.append(WeatherData(
                             name=favourite_location,
                             date=day["date"],
                             min_temp=day["day"]["mintemp_c"],
