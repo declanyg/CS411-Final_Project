@@ -223,7 +223,7 @@ def set_favourite_location() -> Response:
         favourite_model.set_favourite_location(location)
 
         app.logger.info(f"Location added to {username}'s favourites: {location}")
-        return make_response(jsonify({'status': 'success', 'message': 'Location added to favourites'}), 201)
+        return make_response(jsonify({'status': 'success', 'message': 'Location added to favourites', 'favourites': favourite_model.favourites}), 201)
 
     except Exception as e:
         app.logger.error(f"Error adding location to favourites: {e}")
@@ -256,10 +256,10 @@ def remove_favourite_location() -> Response:
         favourite_model = favourites_models[username]
 
         # Remove location from favourites
-        favourite_model.set_favourite_location(location)
+        favourite_model.remove_favourite_location(location)
 
         app.logger.info(f"Location removed from {username}'s favourites: {location}")
-        return make_response(jsonify({'status': 'success', 'message': 'Location removed from favourites'}), 201)
+        return make_response(jsonify({'status': 'success', 'message': 'Location removed from favourites', "favourites": favourite_model.favourites}), 201)
 
     except Exception as e:
         app.logger.error(f"Error removing location from favourites: {e}")
@@ -334,7 +334,7 @@ def get_all_favourite_locations(username: str) -> Response:
         app.logger.error(f"Error retrieving locations from favourites: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
 
-@app.route('/api/get_weather_by_favourite_location/<string:username>/<int:location>', methods=['GET'])
+@app.route('/api/get_weather_by_favourite_location/<string:username>/<string:location>', methods=['GET'])
 def get_weather_by_favourite_location(username: str, location: str) -> Response:
     """
     Route to retrieve a user's favourite location's weather.
@@ -384,7 +384,7 @@ def get_all_favourite_weathers(username: str) -> Response:
         favourite_model = favourites_models[username]
 
         #Get current weather from favourited location
-        weathers = favourite_model.get_all_favourite_weathers(location)
+        weathers = favourite_model.get_all_favourite_weathers()
 
         return make_response(jsonify({'status': 'success', 'weathers': weathers}), 200)
 

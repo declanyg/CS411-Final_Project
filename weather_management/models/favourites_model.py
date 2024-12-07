@@ -119,6 +119,7 @@ class FavouritesModel:
             try:
                 response = requests.get(self.base_url+'/current.json', params=params)
                 if response.status_code == 200:
+                    response = response.json()
                     weather = CurrentWeather(
                         name=favourite_location, 
                         temperature=response["current"]["temp_c"], 
@@ -163,6 +164,7 @@ class FavouritesModel:
             try:
                 response = requests.get(self.base_url+'/current.json', params=params)
                 if response.status_code == 200:
+                    response = response.json()
                     weather = CurrentWeather(
                         name=location, 
                         temperature=response["current"]["temp_c"], 
@@ -200,7 +202,7 @@ class FavouritesModel:
         try:
             datetime.strptime(date, "%Y-%m-%d")
         except ValueError:
-            raise ValueError(f"Days must be in the format of YYYY-MM-dd, got {date}")
+            raise ValueError(f"Date must be in the format of YYYY-MM-dd, got {date}")
         
         #Checking if in favourites as all favourited locations should be valid (only added to list when valid)
         #This aims to minimize API calls.
@@ -216,6 +218,7 @@ class FavouritesModel:
             try:
                 response = requests.get(self.base_url+'/history.json', params=params)
                 if response.status_code == 200:
+                    response = response.json()
                     day = response["forecast"]["forecastday"][0]
                     historical_data = WeatherData(
                         name=favourite_location,
@@ -275,6 +278,7 @@ class FavouritesModel:
             try:
                 response = requests.get(self.base_url+'/forecast.json', params=params)
                 if response.status_code == 200:
+                    response = response.json()
                     for day in response["forecast"]["forecastday"]:
                         forecasts.append(WeatherData(
                             name=favourite_location,
