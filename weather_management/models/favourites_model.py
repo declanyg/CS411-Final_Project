@@ -75,11 +75,11 @@ class FavouritesModel:
 
     def clear_favourites(self) -> None:
         """
-        Clears all favourite locations. If favourites is already empty, logs a warning.
+        Clears all favourite locations. If favourites is already empty, logs info.
         """
         logger.info("Clearing favourites")
         if self.get_favourites_length() == 0:
-            logger.warning("Clearing an empty favourites list")
+            logger.info("Clearing an empty favourites list")
         self.favourites.clear()
 
     ##################################################
@@ -119,6 +119,7 @@ class FavouritesModel:
             try:
                 response = requests.get(self.base_url+'/current.json', params=params)
                 if response.status_code == 200:
+                    response = response.json()
                     weather = CurrentWeather(
                         name=favourite_location, 
                         temperature=response["current"]["temp_c"], 
@@ -163,6 +164,7 @@ class FavouritesModel:
             try:
                 response = requests.get(self.base_url+'/current.json', params=params)
                 if response.status_code == 200:
+                    response = response.json()
                     weather = CurrentWeather(
                         name=location, 
                         temperature=response["current"]["temp_c"], 
@@ -216,6 +218,7 @@ class FavouritesModel:
             try:
                 response = requests.get(self.base_url+'/history.json', params=params)
                 if response.status_code == 200:
+                    response = response.json()
                     day = response["forecast"]["forecastday"][0]
                     historical_data = WeatherData(
                         name=favourite_location,
@@ -275,6 +278,7 @@ class FavouritesModel:
             try:
                 response = requests.get(self.base_url+'/forecast.json', params=params)
                 if response.status_code == 200:
+                    response = response.json()
                     for day in response["forecast"]["forecastday"]:
                         forecasts.append(WeatherData(
                             name=favourite_location,
@@ -332,6 +336,7 @@ class FavouritesModel:
         try:
             response = requests.get(self.base_url+'/timezone.json', params=params)
             if response.status_code == 200:
+                response = response.json()
                 return True
             else:
                 logger.error("Invalid location name %s", location_name)
