@@ -28,10 +28,6 @@ def sample_place1():
 def sample_place2():
     return ("New York")
 
-@pytest.fixture
-def sample_favourite_list():
-    return [sample_place1, sample_place2]
-
 ######################################################
 #
 #    Favourite Location Management Functions Test Cases
@@ -46,12 +42,15 @@ def test_set_favourite_location(favourites_model, sample_place1):
 
 def test_set_duplicate_favourite_location(favourites_model, sample_place1):
    """Test error when adding a duplicate favourite location"""
+   favourites_model.set_favourite_location(sample_place1)
+   assert len(favourites_model.favourites) == 1
    with pytest.raises(ValueError, match="Location with name Boston already exists in favourites"):
       favourites_model.set_favourite_location(sample_place1)
 
-def test_remove_favourite_location(favourites_model, sample_favourite_list, sample_place1, sample_place2):
+def test_remove_favourite_location(favourites_model, sample_place1, sample_place2):
     """Test removing a location from a user's favourites."""
-    favourites_model.favourites.extend(sample_favourite_list)
+    favourites_model.set_favourite_location(sample_place1)
+    favourites_model.set_favourite_location(sample_place2)
     assert len(favourites_model.favourites) == 2
 
     favourites_model.remove_favourite_location(sample_place2)
@@ -79,9 +78,10 @@ def test_clear_playlist_empty_playlist(favourites_model, caplog):
 #
 ##################################################
 
-def test_get_all_favourites(favourites_model, sample_favourite_list, sample_place1, sample_place2):
+def test_get_all_favourites(favourites_model, sample_place1, sample_place2):
     """Test successfully retrieving all locations from the favourites list."""
-    favourites_model.favourites.extend(sample_favourite_list)
+    favourites_model.set_favourite_location(sample_place1)
+    favourites_model.set_favourite_location(sample_place2)
     all_locations = favourites_model.get_all_favourites()
 
     assert len(all_locations) == 2
@@ -90,12 +90,11 @@ def test_get_all_favourites(favourites_model, sample_favourite_list, sample_plac
 
 
 def test_get_weather_by_favourite_locations(mocker, favourites_model, sample_place1):
-    favourites_model.set_favourite_location(sample_place1)
 
     # Mock requests.get to return a fake response so we don't have to deal with HTTP
-    mock_response = mocker.patch("requests.get", return_value=mock_response)
-    mock_response.status_code = 200
-    mock_response.json.return_value = {
+    mock_response = mocker.patch("requests.get")
+    mock_response.return_value.status_code = 200
+    mock_response.return_value.json.return_value = {
         "current": {
             "temp_c": 25.0,
             "feelslike_c": 27.0,
@@ -105,35 +104,52 @@ def test_get_weather_by_favourite_locations(mocker, favourites_model, sample_pla
             "pressure_mb": 1012,
             "precip_mm": 0.0,
             "cloud": 20,
-            "condition": {"text": "Sunny"},
+            "condition": {"text": "Sunny"}
         }
     }
 
-
+    favourites_model.set_favourite_location(sample_place1)
     result = favourites_model.get_weather_by_favourite_location(sample_place1)
 
     assert result.name == sample_place1
     assert result.temperature == 25.0
     assert result.condition == "Sunny"
 
-def test_get_weather_by_favourite_location_not_in_favourites(favourites_model):
+def test_get_weather_by_favourite_location_not_in_favourites(favourites_model, mocker, sample_place1):
     """Test error when the location is not in the favourites list."""
-    with pytest.raises(ValueError, match="Location 'Tokyo' not found in favourites"):
+    mock_response = mocker.patch("requests.get")
+    mock_response.return_value.status_code = 200
+    mock_response.return_value.json.return_value = {
+        "current": {
+            "temp_c": 25.0,
+            "feelslike_c": 27.0,
+            "humidity": 60,
+            "wind_kph": 15.0,
+            "wind_dir": "NE",
+            "pressure_mb": 1012,
+            "precip_mm": 0.0,
+            "cloud": 20,
+            "condition": {"text": "Sunny"}
+        }
+    }
+    favourites_model.set_favourite_location(sample_place1)
+    with pytest.raises(ValueError, match="Location 'Tokyo' not found in favourites."):
         favourites_model.get_weather_by_favourite_location("Tokyo")
 
 
 def test_get_weather_by_favourite_location_api_failure(mocker, favourites_model, sample_place1):
     """Test API failure when fetching weather data."""
     # Mock requests.get to raise a RequestException
+    favourites_model.set_favourite_location(sample_place1)
     mocker.patch("requests.get", side_effect=Exception("Network Error"))
-
     with pytest.raises(Exception, match="Network Error"):
         favourites_model.get_weather_by_favourite_location(sample_place1)
 
 
 
-def test_get_all_favourite_weathers(favourites_model, sample_favourite_list, sample_place1, sample_place2, mocker):
-    favourites_model.favourites.extend(sample_favourite_list)
+def test_get_all_favourite_weathers(favourites_model, sample_place1, sample_place2, mocker):
+    favourites_model.set_favourite_location(sample_place1)
+    favourites_model.set_favourite_location(sample_place2)
 
     mock_weather_data_1 = {
         "current": {
@@ -177,9 +193,9 @@ def test_get_all_favourite_weathers(favourites_model, sample_favourite_list, sam
     assert weathers[0].temperature == 22.5
     assert weathers[0].condition == "Clear"
 
-    assert weathers[0].name == sample_place2
-    assert weathers[0].temperature == 18.0
-    assert weathers[0].condition == "Rainy"
+    assert weathers[1].name == sample_place2
+    assert weathers[1].temperature == 18.0
+    assert weathers[1].condition == "Rainy"
 
 def test_get_historical_weather_by_favourite_location(favourites_model, sample_place1, mocker):
 
@@ -198,7 +214,7 @@ def test_get_historical_weather_by_favourite_location(favourites_model, sample_p
                     "avgvis_km": 10.0,
                     "avghumidity": 60,
                     "daily_chance_of_rain": 10,
-                    "daily_chance_of_snow": 0,
+                    "daily_chance_of_snow": 1,
                     "condition": {
                         "text": "Partly Cloudy"
                     }
@@ -212,7 +228,8 @@ def test_get_historical_weather_by_favourite_location(favourites_model, sample_p
     mock_get = mocker.patch("requests.get")
     mock_get.return_value.status_code = 200
     mock_get.return_value.json.return_value = mock_historical_weather_data  # Simulate the API JSON response
-    
+
+    favourites_model.set_favourite_location(sample_place1)
     historical_weather = favourites_model.get_historical_weather_by_favourite_location(sample_place1, date)
 
     assert historical_weather.name == sample_place1
@@ -226,7 +243,7 @@ def test_get_historical_weather_by_favourite_location(favourites_model, sample_p
     assert historical_weather.avg_visibility == 10.0
     assert historical_weather.avg_humidity == 60
     assert historical_weather.chance_of_rain == 10
-    assert historical_weather.chance_of_snow == 0
+    assert historical_weather.chance_of_snow == 1
     assert historical_weather.condition == "Partly Cloudy"
         
 
@@ -280,6 +297,7 @@ def test_get_forecast_by_favourite_location(favourites_model, sample_place2, moc
     mock_get.return_value.status_code = 200
     mock_get.return_value.json.return_value = mock_forecast_data  # Simulate the forecast JSON response
     
+    favourites_model.set_favourite_location(sample_place2)
     forecast = favourites_model.get_forecast_by_favourite_location(sample_place2, days)
     
     assert len(forecast) == days
@@ -299,8 +317,9 @@ def test_get_forecast_by_favourite_location(favourites_model, sample_place2, moc
     assert forecast[1].condition == "Rainy"
 
 
-def test_get_favourites_length(favourites_model, sample_favourite_list):
-    favourites_model.favourites.extend(sample_favourite_list)
+def test_get_favourites_length(favourites_model, sample_place1, sample_place2):
+    favourites_model.set_favourite_location(sample_place1)
+    favourites_model.set_favourite_location(sample_place2)
     value = favourites_model.get_favourites_length()
     assert value == 2
 
@@ -335,8 +354,9 @@ def test_check_if_empty_empty(favourites_model):
         favourites_model.check_if_empty()
 
 
-def test_check_if_empty_NOT_empty(favourites_model, sample_favourite_list):
-    favourites_model.favourites.extend(sample_favourite_list)
+def test_check_if_empty_NOT_empty(favourites_model, sample_place1, sample_place2):
+    favourites_model.set_favourite_location(sample_place1)
+    favourites_model.set_favourite_location(sample_place2)
     try:
         favourites_model.check_if_empty()
     except ValueError as e:

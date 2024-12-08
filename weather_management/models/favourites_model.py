@@ -75,11 +75,11 @@ class FavouritesModel:
 
     def clear_favourites(self) -> None:
         """
-        Clears all favourite locations. If favourites is already empty, logs info.
+        Clears all favourite locations. If favourites is already empty, logs a warning.
         """
         logger.info("Clearing favourites")
         if self.get_favourites_length() == 0:
-            logger.info("Clearing an empty favourites list")
+            logger.warning("Clearing an empty favourites list")
         self.favourites.clear()
 
     ##################################################
@@ -202,7 +202,7 @@ class FavouritesModel:
         try:
             datetime.strptime(date, "%Y-%m-%d")
         except ValueError:
-            raise ValueError(f"Days must be in the format of YYYY-MM-dd, got {date}")
+            raise ValueError(f"Date must be in the format of YYYY-MM-dd, got {date}")
         
         #Checking if in favourites as all favourited locations should be valid (only added to list when valid)
         #This aims to minimize API calls.
@@ -232,7 +232,7 @@ class FavouritesModel:
                         avg_visibility=day["day"]["avgvis_km"],
                         avg_humidity=day["day"]["avghumidity"],
                         chance_of_rain=day["day"]["daily_chance_of_rain"],
-                        chance_of_snow=day["day"]["daily_chance_of_rain"],
+                        chance_of_snow=day["day"]["daily_chance_of_snow"],
                         condition=day["day"]["condition"]["text"]
                     )
                     logger.info("Location %s historical data on day %s successfully fetched", favourite_location, date)
@@ -336,7 +336,6 @@ class FavouritesModel:
         try:
             response = requests.get(self.base_url+'/timezone.json', params=params)
             if response.status_code == 200:
-                response = response.json()
                 return True
             else:
                 logger.error("Invalid location name %s", location_name)
