@@ -140,7 +140,7 @@ def create_account() -> Response:
 @app.route('/api/update-password', methods=['POST'])
 def update_password() -> Response:
     """
-    Route to create a new user
+    Route to update a user's password
 
     Expected JSON Input:
         - username (str): The user's username.
@@ -152,7 +152,7 @@ def update_password() -> Response:
         400 error if input validation fails.
         500 error if there is an issue updating the password.
     """
-    app.logger.info('Logging into a user')
+    app.logger.info('Updating user password')
     try:
         data = request.get_json()
 
@@ -223,7 +223,7 @@ def set_favourite_location() -> Response:
         favourite_model.set_favourite_location(location)
 
         app.logger.info(f"Location added to {username}'s favourites: {location}")
-        return make_response(jsonify({'status': 'success', 'message': 'Location added to favourites', 'favourites': favourite_model.favourites}), 201)
+        return make_response(jsonify({'status': 'success', 'message': 'Location added to favourites', 'favourites': favourite_model.favourites}), 200)
 
     except Exception as e:
         app.logger.error(f"Error adding location to favourites: {e}")
@@ -259,7 +259,7 @@ def remove_favourite_location() -> Response:
         favourite_model.remove_favourite_location(location)
 
         app.logger.info(f"Location removed from {username}'s favourites: {location}")
-        return make_response(jsonify({'status': 'success', 'message': 'Location removed from favourites', "favourites": favourite_model.favourites}), 201)
+        return make_response(jsonify({'status': 'success', 'message': 'Location removed from favourites', "favourites": favourite_model.favourites}), 200)
 
     except Exception as e:
         app.logger.error(f"Error removing location from favourites: {e}")
@@ -356,7 +356,7 @@ def get_weather_by_favourite_location(username: str, location: str) -> Response:
         #Get current weather from favourited location
         weather = favourite_model.get_weather_by_favourite_location(location)
 
-        return make_response(jsonify({'status': 'success', 'weather': weather}), 200)
+        return make_response(jsonify({'status': 'success', 'message': 'weather retrieved successfully', 'weather': weather }), 200)
 
     except ValueError as e:
         app.logger.error(f"Error retrieving weather by favourite location: {e}")
@@ -386,7 +386,7 @@ def get_all_favourite_weathers(username: str) -> Response:
         #Get current weather from favourited location
         weathers = favourite_model.get_all_favourite_weathers()
 
-        return make_response(jsonify({'status': 'success', 'weathers': weathers}), 200)
+        return make_response(jsonify({'status': 'success', 'message': 'weathers retrieved successfully', 'weathers': weathers}), 200)
 
     except ValueError as e:
         app.logger.error(f"Error retrieving weathers: {e}")
@@ -398,7 +398,7 @@ def get_all_favourite_weathers(username: str) -> Response:
 @app.route('/api/get_historical_weather_by_favourite_location/<string:username>/<string:favourite_location>/<string:date>', methods=['GET'])
 def get_historical_weather_by_favourite_location(username: str, favourite_location: str, date: str) -> Response:
     """
-    Route to retrieve the weather for all of a user's favourite locations.
+    Route to retrieve the historical weather data for a user's favourite location on a particular date.
 
     Path Parameters:
         - username (str): The username
@@ -418,7 +418,7 @@ def get_historical_weather_by_favourite_location(username: str, favourite_locati
         #Get historical weather from favourited location
         historicalWeatherData = favourite_model.get_historical_weather_by_favourite_location(favourite_location, date)
 
-        return make_response(jsonify({'status': 'success', 'date': date, 'weather': historicalWeatherData}), 200)
+        return make_response(jsonify({'status': 'success', 'message': f'Historical weather data retrieved for date {date} successfully', "date": date, "historicalWeatherData": historicalWeatherData}), 200)
 
     except ValueError as e:
         app.logger.error(f"Error retrieving historical weather data: {e}")
@@ -450,7 +450,7 @@ def get_forecast_by_favourite_location(username: str, favourite_location: str, d
         #Get forecasted weather from favourited location
         forecastedWeatherData = favourite_model.get_forecast_by_favourite_location(favourite_location, days)
 
-        return make_response(jsonify({'status': 'success', 'forecast': forecastedWeatherData}), 200)
+        return make_response(jsonify({'status': 'success', 'message': f'Weather for the upcoming {days} day(s) retrieved successfully', 'forecastedWeatherData': forecastedWeatherData}), 200)
 
     except ValueError as e:
         app.logger.error(f"Error retrieving forecasted weather data: {e}")
@@ -462,7 +462,10 @@ def get_forecast_by_favourite_location(username: str, favourite_location: str, d
 @app.route('/api/get_favourites_length/<string:username>', methods=['GET'])
 def get_favourites_length(username: str) -> Response:
     """
-    Route to retrieve a the number of favourite locations a user has.
+    Route to retrieve the number of favourite locations a user has.
+
+    Path Parameters:
+        - username (str): The username
 
     Returns:
         JSON response with the favourites length or error message.
@@ -479,6 +482,7 @@ def get_favourites_length(username: str) -> Response:
 
         return make_response(jsonify({
             'status': 'success',
+            'message': "favourites length retrieved successfully",
             'favourites_length': favourites_length,
         }), 200)
 
