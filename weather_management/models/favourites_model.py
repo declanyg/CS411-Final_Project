@@ -232,7 +232,7 @@ class FavouritesModel:
                         avg_visibility=day["day"]["avgvis_km"],
                         avg_humidity=day["day"]["avghumidity"],
                         chance_of_rain=day["day"]["daily_chance_of_rain"],
-                        chance_of_snow=day["day"]["daily_chance_of_rain"],
+                        chance_of_snow=day["day"]["daily_chance_of_snow"],
                         condition=day["day"]["condition"]["text"]
                     )
                     logger.info("Location %s historical data on day %s successfully fetched", favourite_location, date)
