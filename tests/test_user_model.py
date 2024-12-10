@@ -57,7 +57,7 @@ def test_login_success(mock_cursor, mocker):
     mock_cursor.fetchone.return_value = (salt, hashed_password)
     mocker.patch("weather_management.models.user_model.bcrypt.hashpw", return_value=hashed_password)
 
-    # Call the function to create a new song
+    # Call the function to login to a new user
     result = login(username=username, password=password)
     assert result is True
 
@@ -74,7 +74,7 @@ def test_login_failure(mock_cursor, mocker):
     mock_cursor.fetchone.return_value = (salt, hashed_password)
     mocker.patch("weather_management.models.user_model.bcrypt.hashpw", return_value=bcrypt.hashpw('4321'.encode('utf-8'), salt))
 
-    # Call the function to create a new song
+    # Call the function to login to a new user
     result = login(username=username, password='4321')
     assert result is False
 
@@ -101,7 +101,7 @@ def test_create_user_success(mock_cursor, mocker):
     mocked_hashed_password = bcrypt.hashpw(mocked_password.encode('utf-8'), mocked_salt)
     mocker.patch("weather_management.models.user_model.bcrypt.gensalt", return_value=mocked_salt)
 
-    # Call the function to create a new song
+    # Call the function to create a new user
     create_user(username=mocked_username, password=mocked_password)
 
     expected_query = normalize_whitespace("""
@@ -161,7 +161,7 @@ def test_update_password_success(mock_cursor):
     # Extract the arguments used in the SQL call
     actual_arguments = mock_cursor.execute.call_args_list[1][0][1]
 
-    # Assert that the SQL query was executed with the correct arguments (song ID)
+    # Assert that the SQL query was executed with the correct arguments (username)
     expected_arguments = (mocked_hashed_password, mocked_username)
     assert actual_arguments == expected_arguments, f"The SQL query arguments did not match. Expected {expected_arguments}, got {actual_arguments}."
     
